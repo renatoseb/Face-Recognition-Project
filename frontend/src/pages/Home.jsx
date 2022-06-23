@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles';
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -7,55 +7,13 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
-import InfoIcon from '@mui/icons-material/Info';
 import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid'
+import Item from '../utils/Item';
+import { boxStyleCols } from '../utils/styles';
+import { styled } from '@mui/material/styles';
 
 
-const boxStyleCols = (height, width, inlineBlock = true) => {
-  return {
-    width: width,
-    height: height,
-    display: inlineBlock ? 'inline-block' : 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    p: 1,
-    mx: 1,
-    bgcolor: (theme) =>
-      theme.palette.mode === 'dark' ? '#101010' : 'grey.100',
-    color: (theme) =>
-      theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800',
-    border: '1px solid',
-    borderColor: (theme) =>
-      theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300',
-    borderRadius: 2,
-    fontSize: '0.875rem',
-    fontWeight: '700',
-    textAlign: 'center',
-    margin: '0px'
-  }
-}
-
-const boxStyleRow = (height) => {
-  return ({
-    // width: '25%',
-    height: height,
-    p: 1,
-    bgcolor: (theme) =>
-      theme.palette.mode === 'dark' ? '#101010' : 'grey.100',
-    color: (theme) =>
-      theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800',
-    border: '1px solid',
-    borderColor: (theme) =>
-      theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300',
-    borderRadius: 2,
-    fontSize: '0.875rem',
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: '10px',
-  })
-}
 
 const itemData = [
   {
@@ -131,36 +89,85 @@ const itemData = [
   },
 ];
 
+const Input = styled('input')({
+  display: 'none',
+});
+
 const Home = () => {
+  const [images, setImages] = useState([]);
+  const [image, setImage] = useState(null);
+
+  const getImages = async () => {
+    // const response = await fetch('/api/images');
+    // const data = await response.json();
+    setImages(itemData);
+  }
+
+  const uploadImage = async (e) => {
+    const files = e.target.files;
+    const data = new FormData();
+    data.append('file', files[0]);
+    data.append('upload_preset', 'react-app');
+
+  }
+  const clearImages = () => {
+    setImages([]);
+  }
+
   return (
     <div style={{ height: '99.7vh' }}>
       <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
 
-        <div style={boxStyleCols("100%", "50%", false)}>
-          <Typography variant="h2" component="div" gutterBottom>
+        <Box style={boxStyleCols("100%", "50%", false)}>
+
+          <Typography variant="h2" gutterBottom>
             Facial Recognition
           </Typography>
-
-          <TextField id="outlined-basic" label="Top K" variant="outlined" sx={{ marginBottom: '10px' }} />
-          <Button variant="contained">
-            Upload Image
-          </Button>
+          <TextField
+            id="topK"
+            label="Top K"
+            variant="outlined"
+            sx={{ marginBottom: '10px' }}
+          />
+          <label htmlFor="contained-button-file">
+            <Button variant="contained" component="span">
+              <Input
+                accept="image/*"
+                id="contained-button-file"
+                multiple
+                type="file"
+                onChange={uploadImage}
+              />
+              Upload Image
+            </Button>
+          </label>
 
           <IconButton color="primary" >
             <PhotoCamera />
           </IconButton>
 
-          <Button variant="contained" color="success">
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => getImages()}>
             Recognize
           </Button>
-        </div>
+        </Box>
 
-        <div style={boxStyleCols("100%", "50%")}>
-          <Typography variant="h4" component="div" gutterBottom>
-            Top K Similar Characters
-          </Typography>
-          <ImageList sx={{ width: '100%', height: '97%' }}>
-            {itemData.map((item) => (
+        <Box style={boxStyleCols("100%", "50%")}>
+          <Grid container>
+            <Grid item xs={12}>
+              <Item elevation={4}>
+                Top K Similar Characters
+              </Item>
+
+            </Grid>
+          </Grid>
+
+          <ImageList sx={{ width: '100%', height: '94%', marginTop: '0px' }}>
+
+            {images.map((item) => (
+
               <ImageListItem key={item.img}>
                 <img
                   src={`${item.img}?w=248&fit=crop&auto=format`}
@@ -174,9 +181,10 @@ const Home = () => {
                 />
               </ImageListItem>
             ))}
+
           </ImageList>
 
-        </div>
+        </Box>
       </Box>
     </div >
   )
