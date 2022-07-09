@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -12,6 +12,7 @@ import Grid from '@mui/material/Grid'
 import Item from '../utils/Item';
 import { boxStyleCols } from '../utils/styles';
 import { styled } from '@mui/material/styles';
+import axios from 'axios';
 
 
 
@@ -96,24 +97,33 @@ const Input = styled('input')({
 const Home = () => {
   const [images, setImages] = useState([]);
   const [image, setImage] = useState(null);
+  const [input, setInput] = useState('');
 
   const getImages = async () => {
-    // const response = await fetch('/api/images');
-    // const data = await response.json();
-    setImages(itemData);
+    const data = new FormData();
+    data.append('file', image);
+    axios.post(`http://127.0.0.1:5000/top-k-similars/${input}`, data).then(
+      res => {
+        console.log("Query received!")
+        console.log(res.data.images_paths)
+        setImages(res.data.images_paths)
+      }
+    ).catch(err => console.log(err));
+
+    //setImages(itemData);
   }
 
   const uploadImage = async (e) => {
     const files = e.target.files;
-    const data = new FormData();
-    data.append('file', files[0]);
-    data.append('upload_preset', 'react-app');
-
+    setImage(files[0])
   }
-  const clearImages = () => {
-    setImages([]);
-  }
+  //const clearImages = () => {
+  // setImages([]);
+  //}
 
+  const handleInput = (e) => {
+    setInput(e.target.value);
+  }
   return (
     <div style={{ height: '99.7vh' }}>
       <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
@@ -128,6 +138,7 @@ const Home = () => {
             label="Top K"
             variant="outlined"
             sx={{ marginBottom: '10px' }}
+            onChange={handleInput}
           />
           <label htmlFor="contained-button-file">
             <Button variant="contained" component="span">
@@ -170,14 +181,14 @@ const Home = () => {
 
               <ImageListItem key={item.img}>
                 <img
-                  src={`${item.img}?w=248&fit=crop&auto=format`}
-                  srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                  alt={item.title}
+                  src={`${item.img}`}
+                  srcSet={`${item.img}`}
+                  alt={""}
                   loading="lazy"
                 />
                 <ImageListItemBar
-                  title={item.title}
-                  subtitle={item.author}
+                  title={""}
+                  subtitle={""}
                 />
               </ImageListItem>
             ))}
