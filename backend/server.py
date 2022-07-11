@@ -1,3 +1,4 @@
+from torch import quantize_per_tensor_dynamic
 import api_functions
 
 from flask import Flask, request, jsonify, send_file
@@ -25,13 +26,14 @@ def make_response(query):
         res.append({"img": response_path, "name": real_name})
     return res
 
-@app.route('/top-k-similars/<top_k>', methods=["POST"])
-def get_similar_images(top_k):
+@app.route('/top-k-similars/<top_k>/<query_type>', methods=["POST"])
+def get_similar_images(top_k, query_type):
     file = request.files['file']
     PATH_FILE = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
     file.save(PATH_FILE)
 
-    query_results = api_functions.search(PATH_FILE, int(top_k), "sequential")
+    query_type = "sequential" if query_type == "Sequential" else "rtree"
+    query_results = api_functions.search(PATH_FILE, int(top_k), query_type)
     response = jsonify({ "images_paths": make_response(query_results), "time": query_results[2] })
     return response
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -13,83 +14,18 @@ import Item from '../utils/Item';
 import { boxStyleCols } from '../utils/styles';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
+import MuiAlert from '@mui/material/Alert';
+import Autocomplete from '@mui/material/Autocomplete';
 
 
+const queryTypes = [
+  { label: "Sequential" },
+  { label: "RTree" }
+]
 
-const itemData = [
-  {
-    img: 'http://localhost:5000/image?image_name=William_Jackson/William_Jackson_0001.jpg',
-    title: 'Breakfast',
-    author: '@bkristastucchio',
-    rows: 2,
-    cols: 2,
-    featured: true,
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
-    title: 'Burger',
-    author: '@rollelflex_graphy726',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
-    title: 'Camera',
-    author: '@helloimnik',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
-    title: 'Coffee',
-    author: '@nolanissac',
-    cols: 2,
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1533827432537-70133748f5c8',
-    title: 'Hats',
-    author: '@hjrc33',
-    cols: 2,
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
-    title: 'Honey',
-    author: '@arwinneil',
-    rows: 2,
-    cols: 2,
-    featured: true,
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1516802273409-68526ee1bdd6',
-    title: 'Basketball',
-    author: '@tjdragotta',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1518756131217-31eb79b20e8f',
-    title: 'Fern',
-    author: '@katie_wasserman',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1597645587822-e99fa5d45d25',
-    title: 'Mushrooms',
-    author: '@silverdalex',
-    rows: 2,
-    cols: 2,
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1567306301408-9b74779a11af',
-    title: 'Tomato basil',
-    author: '@shelleypauls',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1471357674240-e1a485acb3e1',
-    title: 'Sea star',
-    author: '@peterlaster',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1589118949245-7d38baf380d6',
-    title: 'Bike',
-    author: '@southside_customs',
-    cols: 2,
-  },
-];
-
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 const Input = styled('input')({
   display: 'none',
 });
@@ -98,16 +34,20 @@ const Home = () => {
   const [images, setImages] = useState([]);
   const [image, setImage] = useState(null);
   const [input, setInput] = useState('');
+  const [time, setTime] = useState(0)
+  const [type, setType] = React.useState('');
+
 
   const getImages = async () => {
     const data = new FormData();
     data.append('file', image);
 
-    axios.post(`http://127.0.0.1:5000/top-k-similars/${input}`, data).then(
+    axios.post(`http://127.0.0.1:5000/top-k-similars/${input}/${type}`, data).then(
       res => {
         console.log("Query received!")
         console.log(res.data.images_paths)
         setImages(res.data.images_paths)
+        setTime(res.data.time)
       }
     ).catch(err => console.log(err));
 
@@ -125,6 +65,11 @@ const Home = () => {
   const handleInput = (e) => {
     setInput(e.target.value);
   }
+
+  const handleType = (e) => {
+    setType(e.target.value);
+  }
+
   return (
     <div style={{ height: '99.7vh' }}>
       <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
@@ -141,8 +86,19 @@ const Home = () => {
             sx={{ marginBottom: '10px' }}
             onChange={handleInput}
           />
+
+          <Autocomplete
+            disablePortal
+            id="combo-box-demo"
+            options={queryTypes}
+            sx={{ width: 300 }}
+            renderInput={(params) => <TextField {...params} label="Query Type" />}
+            onChange={handleType}
+
+          />
+
           <label htmlFor="contained-button-file">
-            <Button variant="contained" component="span">
+            <Button variant="contained" component="span" sx={{ marginTop: '10px' }}>
               <Input
                 accept="image/*"
                 id="contained-button-file"
@@ -167,12 +123,13 @@ const Home = () => {
         </Box>
 
         <Box style={boxStyleCols("100%", "50%")}>
+
           <Grid container>
             <Grid item xs={12}>
               <Item elevation={4}>
                 Top K Similar Characters
               </Item>
-
+              <Alert severity="info">Query took: {time} seconds</Alert>
             </Grid>
           </Grid>
 
