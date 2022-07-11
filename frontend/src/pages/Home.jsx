@@ -18,7 +18,7 @@ import axios from 'axios';
 
 const itemData = [
   {
-    img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
+    img: 'http://localhost:5000/image?image_name=William_Jackson/William_Jackson_0001.jpg',
     title: 'Breakfast',
     author: '@bkristastucchio',
     rows: 2,
@@ -102,6 +102,7 @@ const Home = () => {
   const getImages = async () => {
     const data = new FormData();
     data.append('file', image);
+
     axios.post(`http://127.0.0.1:5000/top-k-similars/${input}`, data).then(
       res => {
         console.log("Query received!")
@@ -110,13 +111,13 @@ const Home = () => {
       }
     ).catch(err => console.log(err));
 
-    //setImages(itemData);
   }
 
   const uploadImage = async (e) => {
     const files = e.target.files;
     setImage(files[0])
   }
+
   //const clearImages = () => {
   // setImages([]);
   //}
@@ -187,7 +188,7 @@ const Home = () => {
                   loading="lazy"
                 />
                 <ImageListItemBar
-                  title={""}
+                  title={item.name}
                   subtitle={""}
                 />
               </ImageListItem>

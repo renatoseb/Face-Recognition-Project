@@ -175,15 +175,15 @@ def search(image_directory, K, search_type):
             rtree_timer_end = time.time()
 
             print("\nThe", K, "clossest neightbours of ", image_directory, "using KNN-RTree are: ")
-            result = list()
+            result_list = list()
 
             for result in rtree_results:
                 image_directory = result.object
-                result.append(image_directory)
+                result_list.append(image_directory)
                 print(image_directory)
 
             print("r-tree took ", rtree_timer_end - rtree_timer_init)
-            return (image_directory, result, rtree_timer_end - rtree_timer_init)
+            return (image_directory, result_list, rtree_timer_end - rtree_timer_init)
 
         if search_type == "sequential":
             sequential_timer_init = time.time()
